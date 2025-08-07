@@ -1,0 +1,6 @@
+cma==4.2.0
+matplotlib==3.10.5
+numpy==2.3.2
+qiskit==2.1.1
+qiskit_ibm_runtime==0.40.1
+stim==1.15.dev1743900324
