@@ -98,31 +98,31 @@ SHOTS = 1                # Shots per noise scenario
 The simulation requires optimized parameter files in JSON format containing platform-specific quantum hardware parameters. **The parameter file must match the settings in `config.py`** (e.g., `NUM_QUBITS = 21` requires 21 qubits worth of parameters).
 
 **Use parameter files like this:**
-```json
+```bash
 {
-    "spam_rates": [
-        0.013427734375,
-        0.009752154356554221,
-        0.0205078125,
-        0.007721985833098121
-    ],
-    "t1_t2_values": [
-        {
-            "t1": 6.363399272084333e-05,
-            "t2": 1.9816307591254707e-05
-        },
-        {
-            "t1": 0.00024796670678882193,
-            "t2": 0.00023600546182412152
-        }
-    ],
-    "ecr_lengths": [5.333333333333332e-07,5.333333333333332e-07],
-    "sqg_length": [5.69e-08,,5.69e-08],
-    "rd_length": [1.216e-06,1.216e-06],
-    "ecr_fid": [0.9934625087568738, 0.9981116487192228],
-    "sqg_fid": [0.9998731637079057, 0.9992618718889338],
-    "lp": [6.884759180577696e-05, 0.001316455545806526],
-    "sp": [0.14833706303566527, 0.01125922715588417]
+   "spam_rates": [
+       0.013427734375,          // State preparation and measurement error rates
+       0.009752154356554221,
+       0.0205078125,
+       0.007721985833098121
+   ],
+   "t1_t2_values": [
+       {
+           "t1": 6.363399272084333e-05,      // T1: relaxation time (seconds)
+           "t2": 1.9816307591254707e-05      // T2: dephasing time (seconds)
+       },
+       {
+           "t1": 0.00024796670678882193,
+           "t2": 0.00023600546182412152
+       }
+   ],
+   "ecr_lengths": [5.333333333333332e-07,5.333333333333332e-07],  // Two-qubit gate durations (seconds)
+   "sqg_length": [5.69e-08,5.69e-08],     // Single-qubit gate durations (seconds)
+   "rd_length": [1.216e-06,1.216e-06],   // Readout operation durations (seconds)
+   "ecr_fid": [0.9934625087568738, 0.9981116487192228],  // Two-qubit gate fidelities
+   "sqg_fid": [0.9998731637079057, 0.9992618718889338],  // Single-qubit gate fidelities
+   "lp": [6.884759180577696e-05, 0.001316455545806526], // Leakage probabilities
+   "sp": [0.14833706303566527, 0.01125922715588417]      // Seepage probabilities
 }
 ```
 #### 3. Run Quantum Noise Simulation
