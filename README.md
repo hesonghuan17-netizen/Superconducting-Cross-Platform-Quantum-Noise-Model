@@ -394,6 +394,10 @@ total_l1 = l1_distance_X + l1_distance_Z
 
 ```
 
+## Data
+
+Research data: https://doi.org/10.5281/zenodo.16983512
+
 ## License
 Apache License 2.0
 
