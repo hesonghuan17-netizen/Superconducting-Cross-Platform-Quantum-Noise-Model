@@ -8,11 +8,11 @@ Accurate noise modeling is essential for developing practical quantum computers,
 This project presents a universal noise model for superconducting quantum chips that overcomes these limitations through a **physics-based parameter decomposition methodology** built on the Stim library[1]. Our approach systematically decomposes platform-calibrated parameters (T1, T2, gate fidelities, readout errors) into four distinct physical mechanisms: **decoherence processes, gate infidelity, state preparation and measurement (SPAM) errors, and leakage propagation**. The model incorporates **Covariance Matrix Adaptation Evolution Strategy (CMA-ES) optimization** to automatically fit parameters against experimental quantum error correction data, ensuring maximum fidelity to actual hardware behavior while enabling accurate and efficient simulation across different quantum platforms.
 
 ## Key Advantages
-🚀 Superior Accuracy: Outperforms all baseline methods across three error correlation types[2]. Compared to traditional models, our CMA-ES optimized approach achieves 12.6× reduction in time error rates, 4.8× reduction in space error rates, and 4.7× reduction in spacetime error rates. Significantly surpasses circuit-level models, phenomenological models, and Google's SD6/SI1000 approaches in all error categories.
+🚀 Superior Accuracy: Outperforms all baseline methods across three error correlation types[2]. Compared to traditional models, our CMA-ES optimized approach achieves 19.5× reduction in time error rates, 9.3× reduction in space error rates, and 5.2× reduction in spacetime error rates. Significantly surpasses Code-capacity models, circuit-level models, phenomenological models, and Google's SD6/SI1000 approaches in all error categories.
 
-⚡ Computational Efficiency: Features polynomial O(n²) complexity instead of exponential O(2ⁿ) scaling, enabling simulation of surface codes with distances up to 49 and circuit depths exceeding 10,000 QEC cycles. Supports large-scale systems (2000+ qubits) within practical memory constraints (<32 GB).
+⚡ Computational Efficiency: Features favorable polynomial scaling with system size, avoiding the exponential overhead associated with density-matrix-based approaches. Enable simulation of surface codes with distances up to 49 and circuit depths exceeding 10,000 QEC cycles. Supports large-scale systems (2000+ qubits) within practical memory constraints (<32 GB).
 
-🌐 Cross-Platform Universality: Demonstrates consistent performance across IBM Quantum processors (Brisbane, Sherbrooke, Torino), and China Telecom's Tianyan quantum systems without requiring any platform-specific parameter tuning or optimization.
+🌐 Cross-Platform Universality: Demonstrates consistent performance across IBM QPUs (Brisbane, Sherbrooke, Torino), China Mobile’s Tianji QPU and QuantumCTeck’s Tianyan QPU without requiring any platform-specific parameter tuning or optimization.
 
 🔬 Rigorous Validation: Extensively tested through single-round cross-platform experiments (5-21 qubits) and multi-round temporal studies (21 qubits over 30 QEC cycles). Uses CMA-ES optimization for automatic parameter fitting against experimental quantum error correction data.
 
@@ -55,10 +55,10 @@ correlations, and spacetime correlations. This analysis is essential for validat
 
 ### Error Rates Comparison
 <div align="center">
-<img width="4451" height="1770" alt="average_error_rates_comparison" src="https://github.com/user-attachments/assets/fd41b78f-154d-4c1c-bedc-6bc79425e82f" />
+<img width="1644" height="811" alt="image" src="https://github.com/user-attachments/assets/c8d34678-7fb4-45ee-a696-b18b77846ccc" />
 </i></div>
 
-<div align="center">Our universal noise model significantly outperforms all baseline methods, achieving 12.6×, 4.8×, and 4.7× improvements in time, space, and spacetime error rates respectively.</i></div>
+<div align="center">Our universal noise model significantly outperforms all baseline methods, achieving 19.5×, 9.3×, and 5.2× improvements in time, space, and spacetime error rates respectively.</i></div>
 
 
 ## Installation
@@ -319,7 +319,7 @@ optimization_results/
 
 ## Single-Round Repetition Code Optimization
 
-The framework includes specialized optimization for single-round repetition codes, using the **quantum diamond norm** (L1 norm) as the objective function to minimize differences between simulated and experimental measurement distributions.
+The framework includes specialized optimization for single-round repetition codes, using the **quantum diamond norm** (total variation distance norm) as the objective function to minimize differences between simulated and experimental measurement distributions.
 
 ### Single-Round Code Features
 
@@ -333,7 +333,7 @@ The framework includes specialized optimization for single-round repetition code
 
 ### Quantum Diamond Norm Optimization
 
-**Objective Function (L1 norm):**
+**Objective Function (total variation distance norm):**
 ```python
 def calculate_l1_distance(sim_counts, exp_counts, total_shots_sim, total_shots_exp):
     """Calculate quantum diamond norm (L1 norm) between distributions"""
@@ -359,7 +359,7 @@ CHIP_CONFIGS = {
         'exp_data_Z_dir': 'path/to/experimental_Z_results'
     },
     'ibm_sherbrooke': {...},
-    'tencent': {...}
+    'tianji': {...}
 }
 
 # Optimization settings
@@ -393,6 +393,10 @@ sim_result_array_Z = sim.sim_Repetition_Z.run_sampling(
 total_l1 = l1_distance_X + l1_distance_Z
 
 ```
+
+## Data
+
+Research data: https://doi.org/10.5281/zenodo.16983512
 
 ## License
 Apache License 2.0
