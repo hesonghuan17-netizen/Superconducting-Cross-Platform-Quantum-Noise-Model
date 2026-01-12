@@ -127,7 +127,7 @@ def load_device_experimental_data(device_key: str) -> Tuple[Dict[int, Any], Dict
     return exp_data_X, exp_data_Z
 
 
-def analyze_results_for_l1(results_array: np.ndarray) -> Dict[str, int]:
+def analyze_results_for_(results_array: np.ndarray) -> Dict[str, int]:
     """Convert raw simulation samples into a bitstring->count dictionary."""
     counts: Dict[str, int] = {}
     for row in results_array:
@@ -136,23 +136,23 @@ def analyze_results_for_l1(results_array: np.ndarray) -> Dict[str, int]:
     return counts
 
 
-def calculate_l1_distance(
+def calculate_TVD_distance(
     sim_counts: Dict[str, int],
     exp_counts: Dict[str, int],
     total_shots_sim: int,
     total_shots_exp: int,
 ) -> float:
     """
-    Compute L1 distance between two outcome distributions (equivalently 2*TVD if TVD is defined with 1/2 factor).
-    Here we use the raw L1 distance: sum_x |p_sim(x) - p_exp(x)|.
+    Compute TVD distance between two outcome distributions (equivalently 2*TVD if TVD is defined with 1/2 factor).
+    Here we use the raw TVD distance: sum_x |p_sim(x) - p_exp(x)|.
     """
     all_states = set(sim_counts.keys()) | set(exp_counts.keys())
-    l1 = 0.0
+    TVD = 0.0
     for state in all_states:
         p_sim = sim_counts.get(state, 0) / total_shots_sim
         p_exp = exp_counts.get(state, 0) / total_shots_exp
-        l1 += abs(p_sim - p_exp)
-    return l1
+        TVD += abs(p_sim - p_exp)
+    return TVD
 
 
 def transform_normalized_to_physical(normalized_params: np.ndarray) -> Dict[str, Any]:
@@ -266,18 +266,18 @@ def create_objective_function(device_key: str, exp_data_X: Dict[int, Any], exp_d
     all_evaluations = []
 
     def objective_function(normalized_params: np.ndarray) -> float:
-        """Objective: sum of averaged L1 distances across all N and both X/Z bases."""
+        """Objective: sum of averaged TVD distances across all N and both X/Z bases."""
         eval_counter["count"] += 1
         eval_id = eval_counter["count"]
 
         physical_params = transform_normalized_to_physical(normalized_params)
 
-        total_l1 = 0.0
-        l1_by_size = {}
+        total_TVD = 0.0
+        TVD_by_size = {}
 
         for num_qubits in NUM_QUBITS_LIST:
-            l1_X_avg = 0.0
-            l1_Z_avg = 0.0
+            TVD_X_avg = 0.0
+            TVD_Z_avg = 0.0
 
             # X basis
             exp_states_X = exp_data_X.get(num_qubits, {})
@@ -298,22 +298,22 @@ def create_objective_function(device_key: str, exp_data_X: Dict[int, Any], exp_d
                         shots=SHOTS,
                         shots_exp=SHOTS_EXP,
                     )
-                    sim_counts_X = analyze_results_for_l1(sim_X)
+                    sim_counts_X = analyze_results_for_TVD(sim_X)
 
-                    l1_X = 0.0
+                    TVD_X = 0.0
                     for _state_key, exp_counts in exp_states_X.items():
-                        l1_X += calculate_l1_distance(
+                        TVD_X += calculate_TVD_distance(
                             sim_counts_X,
                             exp_counts,
                             total_shots_sim=SHOTS,
                             total_shots_exp=sum(exp_counts.values()),
                         )
-                    l1_X_avg = l1_X / len(exp_states_X)
-                    total_l1 += l1_X_avg
+                    TVD_X_avg = TVD_X / len(exp_states_X)
+                    total_TVD += TVD_X_avg
                 except Exception as e:
                     print(f"[{device_name}] X-basis simulation error at n={num_qubits}: {e}")
-                    total_l1 += 999.0
-                    l1_X_avg = 999.0
+                    total_TVD += 999.0
+                    TVD_X_avg = 999.0
 
             # Z basis
             exp_states_Z = exp_data_Z.get(num_qubits, {})
@@ -334,38 +334,38 @@ def create_objective_function(device_key: str, exp_data_X: Dict[int, Any], exp_d
                         shots=SHOTS,
                         shots_exp=SHOTS_EXP,
                     )
-                    sim_counts_Z = analyze_results_for_l1(sim_Z)
+                    sim_counts_Z = analyze_results_for_TVD(sim_Z)
 
-                    l1_Z = 0.0
+                    TVD_Z = 0.0
                     for _state_key, exp_counts in exp_states_Z.items():
-                        l1_Z += calculate_l1_distance(
+                        TVD_Z += calculate_TVD_distance(
                             sim_counts_Z,
                             exp_counts,
                             total_shots_sim=SHOTS,
                             total_shots_exp=sum(exp_counts.values()),
                         )
-                    l1_Z_avg = l1_Z / len(exp_states_Z)
-                    total_l1 += l1_Z_avg
+                    TVD_Z_avg = TVD_Z / len(exp_states_Z)
+                    total_TVD += TVD_Z_avg
                 except Exception as e:
                     print(f"[{device_name}] Z-basis simulation error at n={num_qubits}: {e}")
-                    total_l1 += 999.0
-                    l1_Z_avg = 999.0
+                    total_TVD += 999.0
+                    TVD_Z_avg = 999.0
 
-            l1_by_size[num_qubits] = {"X": l1_X_avg, "Z": l1_Z_avg}
+            TVD_by_size[num_qubits] = {"X": TVD_X_avg, "Z": TVD_Z_avg}
 
         all_evaluations.append(
             {
                 "eval_id": eval_id,
-                "total_l1": float(total_l1),
-                "l1_by_size": l1_by_size,
+                "total_TVD": float(total_TVD),
+                "TVD_by_size": TVD_by_size,
                 "parameters": physical_params,
             }
         )
 
         if eval_id % 10 == 0:
-            print(f"[{device_name}] Evaluation {eval_id:4d}: L1 = {total_l1:.6f}")
+            print(f"[{device_name}] Evaluation {eval_id:4d}: TVD = {total_TVD:.6f}")
 
-        return float(total_l1)
+        return float(total_TVD)
 
     return objective_function, eval_counter, all_evaluations
 
@@ -422,7 +422,7 @@ def optimize_single_device(device_key: str, output_dir: str) -> Dict[str, Any]:
         current_best = es.best.f
         with open(generation_log, "a") as f:
             f.write(
-                f"Generation {generation_counter}: Best L1 = {current_best:.6f}, "
+                f"Generation {generation_counter}: Best TVD = {current_best:.6f}, "
                 f"Evaluations = {eval_counter['count']}\n"
             )
 
@@ -432,7 +432,7 @@ def optimize_single_device(device_key: str, output_dir: str) -> Dict[str, Any]:
                 f.write(json.dumps(rec) + "\n")
 
         if generation_counter % 5 == 0:
-            print(f"[{device_name}] Generation {generation_counter:3d}: best L1 = {current_best:.6f} "
+            print(f"[{device_name}] Generation {generation_counter:3d}: best TVD = {current_best:.6f} "
                   f"(evals={eval_counter['count']})")
 
     final_solution = es.best.x
@@ -442,7 +442,7 @@ def optimize_single_device(device_key: str, output_dir: str) -> Dict[str, Any]:
     print("\n" + "=" * 60)
     print(f"[{device_name}] Optimization completed")
     print("=" * 60)
-    print(f"[{device_name}] Best objective (L1): {final_fitness:.6f}")
+    print(f"[{device_name}] Best objective (TVD): {final_fitness:.6f}")
     print(f"[{device_name}] Generations: {generation_counter}")
     print(f"[{device_name}] Function evaluations: {eval_counter['count']}")
 
@@ -460,7 +460,7 @@ def optimize_single_device(device_key: str, output_dir: str) -> Dict[str, Any]:
     results_file = os.path.join(output_dir, f"optimization_results_{device_key}_{timestamp}.txt")
     with open(results_file, "w") as f:
         f.write(f"Device: {device_name}\n")
-        f.write(f"Best objective (L1): {final_fitness:.6f}\n")
+        f.write(f"Best objective (TVD): {final_fitness:.6f}\n")
         f.write(f"Generations: {generation_counter}\n")
         f.write(f"Function evaluations: {eval_counter['count']}\n")
         f.write("Final optimized parameters:\n")
@@ -578,7 +578,7 @@ def main() -> None:
 
     try:
         result = optimize_single_device("target_device", output_dir)
-        print(f"Optimization finished: {result['device']} (best L1={result['final_fitness']:.6f})")
+        print(f"Optimization finished: {result['device']} (best TVD={result['final_fitness']:.6f})")
 
         summary_file = os.path.join(output_dir, "optimization_summary.txt")
         with open(summary_file, "w") as f:
@@ -589,7 +589,7 @@ def main() -> None:
             f.write("Results:\n")
             f.write("-" * 40 + "\n")
             f.write("Status: success\n")
-            f.write(f"Best objective (L1): {result['final_fitness']:.6f}\n")
+            f.write(f"Best objective (TVD): {result['final_fitness']:.6f}\n")
             f.write(f"Generations: {result['generations']}\n")
             f.write(f"Function evaluations: {result['evaluations']}\n\n")
             f.write("Output files:\n")
