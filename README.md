@@ -12,7 +12,7 @@ This project presents a universal noise model for superconducting quantum chips 
 
 ⚡ Computational Efficiency: Features favorable polynomial scaling with system size, avoiding the exponential overhead associated with density-matrix-based approaches. Enable simulation of surface codes with distances up to 49 and circuit depths exceeding 10,000 QEC cycles. Supports large-scale systems (2000+ qubits) within practical memory constraints (<32 GB).
 
-🌐 Cross-Platform Universality: Demonstrates consistent performance across IBM QPUs (Brisbane, Sherbrooke, Torino), China Mobile’s Tianji QPU and QuantumCTeck’s Tianyan QPU without requiring any platform-specific parameter tuning or optimization.
+🌐 Cross-Platform Universality: Demonstrates consistent performance across IBM QPUs (Brisbane, Sherbrooke, Torino), China Mobile’s Wuyue QPU and QuantumCTeck’s Tianyan QPU without requiring any platform-specific parameter tuning or optimization.
 
 🔬 Rigorous Validation: Extensively tested through single-round cross-platform experiments (5-21 qubits) and multi-round temporal studies (21 qubits over 30 QEC cycles). Uses CMA-ES optimization for automatic parameter fitting against experimental quantum error correction data.
 
@@ -359,7 +359,7 @@ CHIP_CONFIGS = {
         'exp_data_Z_dir': 'path/to/experimental_Z_results'
     },
     'ibm_sherbrooke': {...},
-    'tianji': {...}
+    'Wuyue': {...}
 }
 
 # Optimization settings
